@@ -1,0 +1,31 @@
+body {
+    background-color: grey;
+    margin: 0;
+    padding: 10px;
+}
+table, th, td {
+    border: 1px solid;
+    border-collapse: collapse;
+}
+a {
+    text-decoration: none;
+    color: blue;
+}
+a:hover {
+    color: darkblue;
+}
+a.box, a.float-box {
+    display: block;
+    width: fit-content;
+    background-color: lightblue;
+    color: black;
+    padding: 10px;
+    border: 1px solid black;
+}
+a.box:hover, a.float-box:hover {
+    background-color: lightskyblue;
+}
+a.float-box {
+    float: right;
+    font-size: 150%;
+}
