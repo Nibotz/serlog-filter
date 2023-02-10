@@ -51,12 +51,19 @@
     <br>
 </div>
 
+<div class="tab-holder">
+    <p>Tabs here at some point</p>
+    <!-- tabs here -->
+</div>
+
 <script>
 $(document).ready(function(){
     // intalize (infinite scroll) variables
     const LOAD_LIMIT = 20;
     var loaded = 0;
     var max_loaded = false;
+    // intalize tap variables
+    var tabs = []
     // tree filter made
     $("#tree-filter").jstree({
         "core": {
@@ -135,6 +142,11 @@ $(document).ready(function(){
         let product_count = [];
         $.each(tree_filter.get_json("#", {flat: true}), function(){
             product_count[this.id] = 0;
+            // remove count from the end
+            let p = this.text.search("\\(");
+            if (p != -1) {
+                tree_filter.set_text(this, this.text.slice(0, p - 1));
+            }
         });
         // loop trough products
         $.each(products, function(){
@@ -170,7 +182,7 @@ $(document).ready(function(){
                 child_count += add_childs(this);
             });
             let num = product_count[node.id] += child_count;
-            //tree_filter.set_text(node, node.text + " (" + num + ")");
+            tree_filter.set_text(node, node.text + " (" + num + ")");
             return num;
         }
         $.each(tree_filter.get_json(), function(){
