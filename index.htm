@@ -10,14 +10,21 @@
 </head>
 <body>
 
-<div class="stuff">
+
+<div id="tab-holder">
+    <h2>Tabs</h2>
+    <button class="tab">services</button>
+    <!-- new tabs go here -->
+</div>
+
+<div id="stuff">
     <h2>Services</h2>
-    <div class="products">
-        <!-- products shown here -->
+    <div class="services">
+        <!-- services shown here -->
     </div>
 </div>
 
-<div class="filters">
+<div id="filters">
     <h2>Filters</h2>
     <div class="filter">
         <h3>Service available</h3>
@@ -51,11 +58,6 @@
     <br>
 </div>
 
-<div class="tab-holder">
-    <p>Tabs here at some point</p>
-    <!-- tabs here -->
-</div>
-
 <script>
 $(document).ready(function(){
     // intalize (infinite scroll) variables
@@ -64,7 +66,7 @@ $(document).ready(function(){
     var max_loaded = false;
     // intalize tap variables
     var tabs = []
-    // tree filter made
+    // tree filter intalize
     $("#tree-filter").jstree({
         "core": {
             "data": {
@@ -82,7 +84,7 @@ $(document).ready(function(){
         }
     });
     const tree_filter = $("#tree-filter").jstree();
-    // other filters made (after tree filter)
+    // other filters intalized (after tree filter)
     $("#tree-filter").on("ready.jstree", function(){
         filter_change();
     });
@@ -117,48 +119,52 @@ $(document).ready(function(){
                 edited2: $("input[name='edited2']").val()
             },
             success:function(rText){
-                html = process_products(rText);
+                html = process_services(rText);
                 if (html === "") {
                     max_loaded = true;
                     if (new_filters) {
-                        $("div.products").html("<p class='empty'>*No data found</p>");
+                        $("div.services").html("<p class='empty'>*No data found</p>");
                     }
                 } else {
                     if (new_filters) {
-                        $("div.products").html(html);
+                        $("div.services").html(html);
                     } else {
-                        $("div.products").append(html);
+                        $("div.services").append(html);
                     }
                     loaded += LOAD_LIMIT;
                 }
+                // get service presses
+                $("div.service").on("click", function(){
+                    new_tab(this.id);
+                });
             }
         });
     }
-    // process products
-    function process_products(json_filters){
-        let products = JSON.parse(json_filters);
+    // process services
+    function process_services(json_filters){
+        let services = JSON.parse(json_filters);
         let html = "";
-        // count products
-        let product_count = [];
+        // count services
+        let service_count = [];
         $.each(tree_filter.get_json("#", {flat: true}), function(){
-            product_count[this.id] = 0;
+            service_count[this.id] = 0;
             // remove count from the end
             let p = this.text.search("\\(");
             if (p != -1) {
                 tree_filter.set_text(this, this.text.slice(0, p - 1));
             }
         });
-        // loop trough products
-        $.each(products, function(){
-            product_count[this.id]++; // count products by category id
-            // style products
-            html += "<div>"; // div start
-            html += "<h3>" + this.title + "</h3>"; // title
+        // loop trough services
+        $.each(services, function(){
+            service_count[this.cat_id]++; // count services by category id
+            // style services
+            html += "<div class='service' id='" + this.id + "'>"; // div start
+            html += "<h3 class='service-name'>" + this.title + "</h3>"; // title
             html += "<p><b>categorization:</b> "; // category start
-            if (this.id == null) {
+            if (this.cat_id == null) {
                 html += "none"; // no category
             } else {
-                html += tree_filter.get_path(this.id, " --> "); // category tree
+                html += tree_filter.get_path(this.cat_id, " --> "); // category tree
             }
             html += "</p><br>"; // category end
             html += "<p><b>created:</b> " + this.created + "</p>"; // created
@@ -175,20 +181,20 @@ $(document).ready(function(){
             html += "</p>"; // price end
             html += "</div>"; // div end
         });
-        // add child products to count
+        // add child services to count
         function add_childs(node){
             let child_count = 0;
             $.each(node.children, function(){
                 child_count += add_childs(this);
             });
-            let num = product_count[node.id] += child_count;
+            let num = service_count[node.id] += child_count;
             tree_filter.set_text(node, node.text + " (" + num + ")");
             return num;
         }
         $.each(tree_filter.get_json(), function(){
             add_childs(this);
         });
-        // return styled products
+        // return styled services
         return html;
     }
     // select all button
@@ -215,6 +221,28 @@ $(document).ready(function(){
             filter_change(false);
         }
     });
+    // get tab press
+    $("button.tab").on("click", function(){
+        // nothing just jet
+    });
+    // handle greating new tab
+    function new_tab(id){
+        if (tabs.indexOf(id) == -1) {
+            tab = "<button class='tab' id='tab-" + id + "'>tab " + id + "</button>"; // tab button
+            tab += "<button class='del-tab' id='del-tab-" + id + "'>X</button>"; // delete button
+            $("#tab-holder").append(tab);
+            tabs.push(id);
+        }
+        // handle removing new tabs
+        $("button.del-tab").on("click", function(){
+            let n = tabs.indexOf(this.id.slice(8));
+            if (n != -1) {
+                tabs.splice(n, 1);
+                $("#" + this.id.slice(4)).remove();
+                $(this).remove();
+            }
+        });
+    };
 });
 
 </script>

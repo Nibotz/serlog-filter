@@ -1,44 +1,69 @@
 /* BODY */
 body {
     box-sizing: border-box;
-    background-color: grey;
+    background-color: #808080;
     margin: 0;
     font-family: 'Courier New', Courier, monospace;
 }
 /* MAIN DIVS */
-div.filters {
+#filters {
     position: fixed;
     right: 0;
     top: 0;
-    border-right: 2px solid white;
-    background-color: lightgrey;
+    float: right;
+    border-right: 2px solid #ffffff;
+    background-color: #d3d3d3;
     width: 25%;
     height: 100%;
     overflow: auto;
 }
-div.stuff {
+#stuff {
     position: absolute;
     left: 15%;
     width: 60%;
     height: fit-content;
 }
-div.tab-holder {
+#tab-holder {
     position: fixed;
     left: 0;
     top: 0;
     width: 15%;
     min-height: 100%;
-    background-color: lightgrey;
+    background-color: #d3d3d3;
     overflow: auto;
 }
+/* tab buttons */
+#tab-holder button.tab {
+    float: left;
+    width: 80%;
+    height: 40px;
+    margin-top: 5px;
+    margin-left: 2px;
+    padding: 10px;
+    border: 2px solid #000000;
+    background-color: #5f9ea0;
+}
+#tab-holder button.tab:hover {
+    background-color: #008b8b;
+}
+#tab-holder button.del-tab {
+    float: left;
+    margin: 15px 5px;
+    width: 20px;
+    height: 20px;
+    background-color: inherit;
+    border: none;
+}
+#tab-holder button.del-tab:hover {
+    background-color: #808080;
+}
 /* HEADINGS */
-div.stuff h2 {
+h2 {
     text-align: center;
 }
-div.filters h2 {
-    text-align: center;
+#filters h2 {
     padding-bottom: 20px;
-    border-bottom: 2px solid white;
+    border-bottom: 2px solid #ffffff;
 }
 /* INDIVIDUAL FILTER DIVS */
 div.filter {
@@ -48,7 +73,7 @@ div.filter {
 div.filter input {
     margin: 10px 2px;
     border-radius: 4px;
-    border-color: black;
+    border-color: #000000;
     max-width: 40%;
 }
 div.filter h3 {
@@ -58,34 +83,34 @@ div.filter h3 {
 div.filter #selectAll {
     margin-left: 30px;
 }
-/* PRODUCT CONTAINER */
-div.products {
+/* SERVICE CONTAINER */
+div.services {
     position: relative;
     width: 100%;
     height: fit-content;
     padding-top: 10px;
     padding-bottom: 10px;
-    background-color: cadetblue;
+    background-color: #5f9ea0;
 }
 /* NO DATA */
-div.products p.empty {
-    color: rgb(194, 46, 46);
+div.services p.empty {
+    color: #c22e2e;
     margin-left: 20px;
 }
-/* INDIVIDUAL PRODUCTS */
-div.products div {
+/* INDIVIDUAL SERVICES */
+div.service {
     width: 80%;
     height: 250px;
     margin: 10px auto;
-    background-color: lightskyblue;
-    border: 3px solid darkblue;
+    background-color: #87cefa;
+    border: 3px solid #00008b;
     border-radius: 10px;
 }
-div.products h3 {
+div.service h3 {
     text-align: center;
     padding-bottom: 10px;
-    border-bottom: 6px double darkblue;
+    border-bottom: 6px double #00008b;
 }
-div.products p {
+div.service p {
     margin: 10px;
 }

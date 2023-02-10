@@ -8,8 +8,8 @@ include("db_connection.php");
 $conn = openConn("serlog");
 
 // creating sql command from data
-$query = "SELECT s.title, s.created, s.edited, s.locality_csv, 
-MIN(sc.child_price) AS minprice, MAX(sc.child_price) AS maxprice, c.id
+$query = "SELECT s.id, s.title, s.created, s.edited, s.locality_csv, 
+MIN(sc.child_price) AS minprice, MAX(sc.child_price) AS maxprice, c.id AS cat_id
 FROM services AS s
 LEFT JOIN services_childs AS sc ON s.id = sc.par_srv_id
 LEFT JOIN cats AS c ON s.js_tree_cat = c.id
