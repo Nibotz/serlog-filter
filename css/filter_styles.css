@@ -6,34 +6,21 @@ body {
     font-family: 'Courier New', Courier, monospace;
 }
 /* MAIN DIVS */
-#filters {
-    position: fixed;
-    right: 0;
-    top: 0;
-    float: right;
-    border-right: 2px solid #ffffff;
-    background-color: #d3d3d3;
-    width: 25%;
-    height: 100%;
-    overflow: auto;
-}
-#stuff {
-    position: absolute;
-    left: 15%;
-    width: 60%;
-    height: fit-content;
-}
 #tab-holder {
     position: fixed;
-    left: 0;
-    top: 0;
+    left: 15%;
+    width: 85%;
+    height: 100%;
+}
+#tab-button-holder {
+    position: fixed;
     width: 15%;
-    min-height: 100%;
+    height: 100%;
     background-color: #d3d3d3;
     overflow: auto;
 }
-/* tab buttons */
-#tab-holder button.tab {
+/* TAB BUTTONS */
+#tab-button-holder button.open-tab {
     float: left;
     width: 80%;
     height: 40px;
@@ -41,12 +28,16 @@ body {
     margin-left: 2px;
     padding: 10px;
     border: 2px solid #000000;
+    border-radius: 8px;
     background-color: #5f9ea0;
 }
-#tab-holder button.tab:hover {
+#tab-button-holder button.open-tab:hover {
     background-color: #008b8b;
 }
-#tab-holder button.del-tab {
+#tab-button-holder button.active-tab {
+    border-color: #ff0000;
+}
+#tab-button-holder button.del-tab {
     float: left;
     margin: 15px 5px;
     width: 20px;
@@ -54,14 +45,43 @@ body {
     background-color: inherit;
     border: none;
 }
-#tab-holder button.del-tab:hover {
+#tab-button-holder button.del-tab:hover {
     background-color: #808080;
+    border-radius: 20px;
+}
+/* TABS */
+#tab-holder div.tab {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+#tab-holder div.service-tab {
+    background-color: #1515d0;
+}
+/* filters holder */
+#filter-holder {
+    position: absolute;
+    right: 0;
+    top: 0;
+    border-left: 2px solid #ffffff;
+    background-color: #d3d3d3;
+    width: 30%;
+    height: 100%;
+    overflow: auto;
+}
+/* services holder */
+#service-holder {
+    position: absolute;
+    width: 70%;
+    height: 100%;
+    background-color: #5f9ea0;
+    overflow: auto;
 }
 /* HEADINGS */
 h2 {
     text-align: center;
 }
-#filters h2 {
+#filter-holder h2 {
     padding-bottom: 20px;
     border-bottom: 2px solid #ffffff;
 }
@@ -83,18 +103,9 @@ div.filter h3 {
 div.filter #selectAll {
     margin-left: 30px;
 }
-/* SERVICE CONTAINER */
-div.services {
-    position: relative;
-    width: 100%;
-    height: fit-content;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    background-color: #5f9ea0;
-}
 /* NO DATA */
-div.services p.empty {
-    color: #c22e2e;
+#service-holder p.empty {
+    color: #000000;
     margin-left: 20px;
 }
 /* INDIVIDUAL SERVICES */

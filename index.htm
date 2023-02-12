@@ -11,56 +11,58 @@
 <body>
 
 
-<div id="tab-holder">
+<div id="tab-button-holder">
     <h2>Tabs</h2>
-    <button class="tab">services</button>
-    <!-- new tabs go here -->
+    <button class="open-tab active-tab" id="open-tab-main">services</button>
+    <!-- new tab buttons here -->
 </div>
 
-<div id="stuff">
-    <h2>Services</h2>
-    <div class="services">
-        <!-- services shown here -->
-    </div>
-</div>
-
-<div id="filters">
-    <h2>Filters</h2>
-    <div class="filter">
-        <h3>Service available</h3>
-        <input type="checkbox" name="available" value="locally"> Locally
-        <input type="checkbox" name="available" value="online"> Online
-    </div>
-    <div class="filter">
-        <h3>Price(&euro;)</h3>
-        <input type="number" name="price1">
-        <span>-</span>
-        <input type="number" name="price2">
-    </div>
-    <div class="filter">
-        <h3>Created between</h3>
-        <input type="date" name="created1">
-        <span>-</span>
-        <input type="date" name="created2">
-
-        <h3>Edited between</h3>
-        <input type="date" name="edited1">
-        <span>-</span>
-        <input type="date" name="edited2">
-    </div>
-    <div class="filter">
-        <h3>Categories</h3>
-        <input type="checkbox" id="selectAll">Select all
-        <div id="tree-filter">
-            <!-- tree filter shown here -->
+<div id="tab-holder">
+    <div class="tab" id="tab-main">
+        <div id="service-holder">
+            <!-- services shown here -->
+        </div>
+        <div id="filter-holder">
+            <h2>Filters</h2>
+            <div class="filter">
+                <h3>Service available</h3>
+                <input type="checkbox" name="available" value="locally"> Locally
+                <input type="checkbox" name="available" value="online"> Online
+            </div>
+            <div class="filter">
+                <h3>Price(&euro;)</h3>
+                <input type="number" name="price1">
+                <span>-</span>
+                <input type="number" name="price2">
+            </div>
+            <div class="filter">
+                <h3>Created between</h3>
+                <input type="date" name="created1">
+                <span>-</span>
+                <input type="date" name="created2">
+        
+                <h3>Edited between</h3>
+                <input type="date" name="edited1">
+                <span>-</span>
+                <input type="date" name="edited2">
+            </div>
+            <div class="filter">
+                <h3>Categories</h3>
+                <input type="checkbox" id="selectAll">
+                <span id="selectAll-text"></span>
+                <div id="tree-filter">
+                    <!-- tree filter shown here -->
+                </div>
+            </div>
+            <br>
         </div>
     </div>
-    <br>
+    <!-- new tabs here -->
 </div>
 
 <script>
 $(document).ready(function(){
-    // intalize (infinite scroll) variables
+    // intalize (infinite scroll) variables (doesn't work D:)
     const LOAD_LIMIT = 20;
     var loaded = 0;
     var max_loaded = false;
@@ -103,7 +105,7 @@ $(document).ready(function(){
         let categories = tree_filter.get_selected();
         // ajax call
         $.ajax({
-            url: "process_data.php",
+            url: "filter_services.php",
             method: "POST",
             data: {
                 get_data: 1,
@@ -123,19 +125,19 @@ $(document).ready(function(){
                 if (html === "") {
                     max_loaded = true;
                     if (new_filters) {
-                        $("div.services").html("<p class='empty'>*No data found</p>");
+                        $("#service-holder").html("<p class='empty'>*No data found</p>");
                     }
                 } else {
                     if (new_filters) {
-                        $("div.services").html(html);
+                        $("#service-holder").html(html);
                     } else {
-                        $("div.services").append(html);
+                        $("#service-holder").append(html);
                     }
                     loaded += LOAD_LIMIT;
                 }
                 // get service presses
                 $("div.service").on("click", function(){
-                    new_tab(this.id);
+                    create_tab(this.id.slice(4));
                 });
             }
         });
@@ -149,16 +151,16 @@ $(document).ready(function(){
         $.each(tree_filter.get_json("#", {flat: true}), function(){
             service_count[this.id] = 0;
             // remove count from the end
-            let p = this.text.search("\\(");
+            let p = this.text.search(" \\(");
             if (p != -1) {
-                tree_filter.set_text(this, this.text.slice(0, p - 1));
+                tree_filter.set_text(this, this.text.slice(0, p));
             }
         });
         // loop trough services
         $.each(services, function(){
             service_count[this.cat_id]++; // count services by category id
             // style services
-            html += "<div class='service' id='" + this.id + "'>"; // div start
+            html += "<div class='service' id='ser-" + this.id + "'>"; // div start
             html += "<h3 class='service-name'>" + this.title + "</h3>"; // title
             html += "<p><b>categorization:</b> "; // category start
             if (this.cat_id == null) {
@@ -191,9 +193,11 @@ $(document).ready(function(){
             tree_filter.set_text(node, node.text + " (" + num + ")");
             return num;
         }
+        let num = 0;
         $.each(tree_filter.get_json(), function(){
-            add_childs(this);
+            num += add_childs(this);
         });
+        $("#selectAll-text").html("Select all (" + num + ")");
         // return styled services
         return html;
     }
@@ -215,34 +219,75 @@ $(document).ready(function(){
             filter_change();
         }
     }).jstree();
-    // get when scrolled to bottom
-    $(window).scroll(function(){
+    // get when scrolled to bottom (broken currently)
+    /*$(window).scroll(function(){
         if(!max_loaded && $(document).height() - $(window).height() - $(window).scrollTop() < 1) {
             filter_change(false);
         }
-    });
-    // get tab press
-    $("button.tab").on("click", function(){
-        // nothing just jet
-    });
+    });*/
     // handle greating new tab
-    function new_tab(id){
+    function create_tab(id) {
         if (tabs.indexOf(id) == -1) {
-            tab = "<button class='tab' id='tab-" + id + "'>tab " + id + "</button>"; // tab button
-            tab += "<button class='del-tab' id='del-tab-" + id + "'>X</button>"; // delete button
-            $("#tab-holder").append(tab);
+            let tab = $("<button class='open-tab' id='open-tab-" + id + "'></button>").text("tab " + id); // tab button
+            let del = $("<button class='del-tab' id='del-tab-" + id + "'></button>").text("X"); // delete button
+            // delete tab event
+            $(del).on("click", function(){
+                tabs.splice(tabs.indexOf(id), 1);
+                $(del).remove();
+                $(tab).slideUp("fast", function(){
+                    if (tab.hasClass("active-tab")) open_tab("main");
+                    $(tab).remove();
+                    $("#tab-" + id).remove();
+                });
+
+            });
+            // open tab event
+            $(tab).on("click", function(){
+                open_tab(id);
+            });
+            // add new buttons
+            $("#tab-button-holder").append(tab, del);
             tabs.push(id);
+            // get new tab via ajax call
+            $.ajax({
+                url: "service_information.php",
+                method: "POST",
+                data: {
+                    get_data: 1,
+                    id: id
+                },
+                success:function(rText){
+                    html = process_tab(rText);
+                    $("#tab-holder").append(html);
+                    open_tab(id);
+                }
+            });
+        } else {
+            open_tab(id);
         }
-        // handle removing new tabs
-        $("button.del-tab").on("click", function(){
-            let n = tabs.indexOf(this.id.slice(8));
-            if (n != -1) {
-                tabs.splice(n, 1);
-                $("#" + this.id.slice(4)).remove();
-                $(this).remove();
-            }
-        });
     };
+    // style the tab
+    function process_tab(json_service) {
+        let sdata = JSON.parse(json_service);
+        let html = "<div class='tab service-tab' id='tab-" + sdata["id"] + "'>";
+        // tab styled
+        html += "<h2>" + sdata["title"] + "</h2>";
+        // return styled tab
+        html += "</div>";
+        return html;
+    }
+    // handle changing tab
+    function open_tab(id) {
+        let active_tab = $("#tab-button-holder .active-tab");
+        $("#" + active_tab.attr("id").slice(5)).css("display", "none");
+        active_tab.removeClass("active-tab");
+        $("#open-tab-" + id).addClass("active-tab");
+        $("#tab-" + id).css("display", "block");
+    }
+    // main tab
+    $("#open-tab-main").on("click", function(){
+        open_tab("main");
+    });
 });
 
 </script>
