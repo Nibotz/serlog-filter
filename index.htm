@@ -13,7 +13,7 @@
 
 <div id="tab-button-holder">
     <h2>Tabs</h2>
-    <button class="open-tab active-tab" id="open-tab-main">services</button>
+    <button class="open-tab" id="open-tab-main">services</button>
     <!-- new tab buttons here -->
 </div>
 
@@ -62,13 +62,17 @@
 
 <script>
 $(document).ready(function(){
+    // get url parameters
+    const url = new URLSearchParams(location.search);
     // intalize (infinite scroll) variables (doesn't work D:)
     const LOAD_LIMIT = 20;
     var loaded = 0;
     var max_loaded = false;
-    // intalize tap variables
-    var tabs = []
-    // tree filter intalize
+    // intalize tab variables
+    var current_tab = url.has("current_tab") ? url.get("current_tab") : "main";
+    var other_tabs = url.has("other_tabs") ? url.get("other_tabs").split(",") : [];
+    // MAIN TAB
+    // tree filter intalized
     $("#tree-filter").jstree({
         "core": {
             "data": {
@@ -90,8 +94,20 @@ $(document).ready(function(){
     $("#tree-filter").on("ready.jstree", function(){
         filter_change();
     });
+    // OTHER TABS
+    // current tab
+    if (current_tab != "main") {
+        create_tabs([current_tab], current_tab);
+    } else {
+        open_tab("main", true);
+    }
+    // closed tabs
+    if (other_tabs.length > 0) {
+        create_tabs(other_tabs, null);
+    }
+    // FILTERS + SERVICES
     // change filter
-    function filter_change(new_filters = true){
+    function filter_change(new_filters=true){
         if (new_filters) {
             loaded = 0;
             max_loaded = false;
@@ -137,7 +153,7 @@ $(document).ready(function(){
                 }
                 // get service presses
                 $("div.service").on("click", function(){
-                    create_tab(this.id.slice(4));
+                    new_tab(this.id.slice(4));
                 });
             }
         });
@@ -201,6 +217,7 @@ $(document).ready(function(){
         // return styled services
         return html;
     }
+    // BUTTON ACTION
     // select all button
     $("#selectAll").change(function(){
         if ($(this).is(":checked")) {
@@ -225,69 +242,104 @@ $(document).ready(function(){
             filter_change(false);
         }
     });*/
-    // handle greating new tab
-    function create_tab(id) {
-        if (tabs.indexOf(id) == -1) {
-            let tab = $("<button class='open-tab' id='open-tab-" + id + "'></button>").text("tab " + id); // tab button
-            let del = $("<button class='del-tab' id='del-tab-" + id + "'></button>").text("X"); // delete button
-            // delete tab event
-            $(del).on("click", function(){
-                tabs.splice(tabs.indexOf(id), 1);
-                $(del).remove();
-                $(tab).slideUp("fast", function(){
-                    if (tab.hasClass("active-tab")) open_tab("main");
-                    $(tab).remove();
-                    $("#tab-" + id).remove();
+    // TAB MAKING STUFF
+    // create new tab
+    function create_tabs(ids, tab_to_open) {
+        $.ajax({
+            url: "service_information.php",
+            method: "POST",
+            data: {
+                get_data: 1,
+                ids: (ids + "")
+            },
+            success:function(rText) {
+                let sdata = JSON.parse(rText);
+                let html = "";
+                // style each tab
+                $.each(sdata, function() {
+                    html += "<div class='tab service-tab' id='tab-" + this.id + "'>";
+                    html += "<h2>" + this.title + "</h2>";
+                    html += "</div>";
                 });
-
-            });
-            // open tab event
-            $(tab).on("click", function(){
-                open_tab(id);
-            });
-            // add new buttons
-            $("#tab-button-holder").append(tab, del);
-            tabs.push(id);
-            // get new tab via ajax call
-            $.ajax({
-                url: "service_information.php",
-                method: "POST",
-                data: {
-                    get_data: 1,
-                    id: id
-                },
-                success:function(rText){
-                    html = process_tab(rText);
-                    $("#tab-holder").append(html);
-                    open_tab(id);
+                // append new tabs
+                $("#tab-holder").append(html);
+                // make buttons for each tab
+                $.each(sdata, function() {
+                    let id = this.id;
+                    // tab buttons made
+                    let tab = $("<button class='open-tab' id='open-tab-" + id + "'></button>").text("tab " + id); // tab button
+                    let del = $("<button class='del-tab' id='del-tab-" + id + "'></button>").text("X"); // delete button
+                    // delete tab event
+                    $(del).on("click", function(){
+                        $(del).remove();
+                        $(tab).slideUp("fast", function(){
+                            other_tabs.splice(other_tabs.indexOf(id), 1);
+                            if (id == current_tab) {
+                                open_tab("main");
+                            } else {
+                                update_url();
+                            }
+                            $(tab).remove();
+                            $("#tab-" + id).remove();
+                        });
+                    });
+                    // open tab event
+                    $(tab).on("click", function(){
+                        open_tab(id);
+                    });
+                    // add new buttons
+                    $("#tab-button-holder").append(tab, del);
+                });
+                if (tab_to_open !== null) {
+                    open_tab(tab_to_open, true);
                 }
-            });
+            }
+        });
+    }
+    // handle greating new tab
+    function new_tab(id) {
+        if (current_tab != id && !other_tabs.includes(id)) {
+            create_tabs([id], id);
         } else {
             open_tab(id);
         }
     };
-    // style the tab
-    function process_tab(json_service) {
-        let sdata = JSON.parse(json_service);
-        let html = "<div class='tab service-tab' id='tab-" + sdata["id"] + "'>";
-        // tab styled
-        html += "<h2>" + sdata["title"] + "</h2>";
-        // return styled tab
-        html += "</div>";
-        return html;
-    }
-    // handle changing tab
-    function open_tab(id) {
-        let active_tab = $("#tab-button-holder .active-tab");
-        $("#" + active_tab.attr("id").slice(5)).css("display", "none");
-        active_tab.removeClass("active-tab");
-        $("#open-tab-" + id).addClass("active-tab");
-        $("#tab-" + id).css("display", "block");
-    }
-    // main tab
+    // opening main tab
     $("#open-tab-main").on("click", function(){
         open_tab("main");
     });
+    // handle changing tab
+    function open_tab(id, forced=false) {
+        if (current_tab != id || forced) {
+            // old tab
+            if ($("#open-tab-" + current_tab).hasClass("active-tab")) {
+                $("#tab-" + current_tab).removeClass("active-tab");
+                $("#open-tab-" + current_tab).removeClass("active-tab");
+                if (current_tab != "main") {
+                    other_tabs.push(current_tab);
+                }
+            }
+            // new tab
+            $("#tab-" + id).addClass("active-tab");
+            $("#open-tab-" + id).addClass("active-tab");
+            if (other_tabs.includes(id)) {
+                other_tabs.splice(other_tabs.indexOf(id), 1);
+            }
+            current_tab = id;
+            update_url();
+        }
+    }
+    // update url
+    function update_url() {
+        let par = new URLSearchParams(location.search);
+        par.set("current_tab", current_tab);
+        if (other_tabs.length == 0) {
+            par.delete("other_tabs");
+        } else {
+            par.set("other_tabs", other_tabs + "");
+        }
+        history.pushState({}, "", ".?" + par.toString());
+    }
 });
 
 </script>
