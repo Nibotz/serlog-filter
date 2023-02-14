@@ -47,7 +47,7 @@ body {
 }
 #tab-button-holder button.del-tab:hover {
     background-color: #808080;
-    border-radius: 20px;
+    border-radius: 50%;
 }
 /* TABS */
 #tab-holder div.tab {

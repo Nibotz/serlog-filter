@@ -28,10 +28,10 @@ if ($_POST["categories"] !== "") {
     $query .= "AND(s.js_tree_cat IN (" . $_POST["categories"] . "))";
 }
 // price filters using services_childs
-if ($_POST["price1"] !== "") {
+if ($_POST["price1"] !== "" && ctype_digit($_POST["price1"])) {
     $query .= "AND(" . $_POST["price1"] . " <= (SELECT MAX(sc.child_price) FROM services_childs AS sc WHERE s.id = sc.par_srv_id))";
 }
-if ($_POST["price2"] !== "") {
+if ($_POST["price2"] !== "" && ctype_digit($_POST["price2"])) {
     $query .= "AND(" . $_POST["price2"] . " >= (SELECT MIN(sc.child_price) FROM services_childs AS sc WHERE s.id = sc.par_srv_id))";
 }
 // created date filters

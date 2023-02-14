@@ -31,9 +31,9 @@
             </div>
             <div class="filter">
                 <h3>Price(&euro;)</h3>
-                <input type="number" name="price1">
+                <input name="price1">
                 <span>-</span>
-                <input type="number" name="price2">
+                <input name="price2">
             </div>
             <div class="filter">
                 <h3>Created between</h3>
@@ -62,31 +62,27 @@
 
 <script>
 $(document).ready(function(){
-    // get url parameters
-    const url = new URLSearchParams(location.search);
     // intalize (infinite scroll) variables (doesn't work D:)
     const LOAD_LIMIT = 20;
     var loaded = 0;
     var max_loaded = false;
-    // intalize tab variables
-    var current_tab = url.has("current_tab") ? url.get("current_tab") : "main";
-    var other_tabs = url.has("other_tabs") ? url.get("other_tabs").split(",") : [];
-    // MAIN TAB
+    // tab variables
+    var current_tab, other_tabs;
     // tree filter intalized
     $("#tree-filter").jstree({
-        "core": {
-            "data": {
-                "method": "POST",
-                "data": {
-                    "get_data": 1
+        core: {
+            data: {
+                method: "POST",
+                data: {
+                    get_data: 1
                 },
-                "url": "make_tree.php",
-                "dataType": "json"
+                url: "make_tree.php",
+                dataType: "json"
             }
         },
-        "plugins": ["checkbox", "wholerow"],
-        "checkbox": {
-            "keep_selected_style": 0
+        plugins: ["checkbox", "wholerow"],
+        checkbox: {
+            keep_selected_style: 0
         }
     });
     const tree_filter = $("#tree-filter").jstree();
@@ -94,16 +90,23 @@ $(document).ready(function(){
     $("#tree-filter").on("ready.jstree", function(){
         filter_change();
     });
-    // OTHER TABS
-    // current tab
-    if (current_tab != "main") {
-        create_tabs([current_tab], current_tab);
-    } else {
-        open_tab("main", true);
-    }
-    // closed tabs
-    if (other_tabs.length > 0) {
-        create_tabs(other_tabs, null);
+    // load tabs
+    intalize_tabs();
+    function intalize_tabs() {
+        // tab variables
+        let url = new URLSearchParams(location.search);
+        current_tab = url.has("current_tab") ? url.get("current_tab") : "main";
+        other_tabs = url.has("other_tabs") ? url.get("other_tabs").split(",") : [];
+        // current tab
+        if (current_tab != "main") {
+            create_tabs([current_tab], current_tab);
+        } else {
+            open_tab("main", true);
+        }
+        // closed tabs
+        if (other_tabs.length > 0) {
+            create_tabs(other_tabs, null);
+        }
     }
     // FILTERS + SERVICES
     // change filter
@@ -338,7 +341,7 @@ $(document).ready(function(){
         } else {
             par.set("other_tabs", other_tabs + "");
         }
-        history.pushState({}, "", ".?" + par.toString());
+        history.pushState(null, null, ".?" + par.toString());
     }
 });
 
