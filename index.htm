@@ -228,7 +228,7 @@ $(document).ready(function(){
         } else {
             tree_filter.uncheck_all();
         }
-    })
+    });
     // get filter change
     $("input").change(function(){
         filter_change();
@@ -279,9 +279,8 @@ $(document).ready(function(){
                             other_tabs.splice(other_tabs.indexOf(id), 1);
                             if (id == current_tab) {
                                 open_tab("main");
-                            } else {
-                                update_url();
                             }
+                            update_url();
                             $(tab).remove();
                             $("#tab-" + id).remove();
                         });
@@ -289,6 +288,7 @@ $(document).ready(function(){
                     // open tab event
                     $(tab).on("click", function(){
                         open_tab(id);
+                        update_url();
                     });
                     // add new buttons
                     $("#tab-button-holder").append(tab, del);
@@ -306,10 +306,12 @@ $(document).ready(function(){
         } else {
             open_tab(id);
         }
-    };
+        update_url();
+    }
     // opening main tab
     $("#open-tab-main").on("click", function(){
         open_tab("main");
+        update_url();
     });
     // handle changing tab
     function open_tab(id, forced=false) {
@@ -329,7 +331,6 @@ $(document).ready(function(){
                 other_tabs.splice(other_tabs.indexOf(id), 1);
             }
             current_tab = id;
-            update_url();
         }
     }
     // update url
@@ -341,8 +342,26 @@ $(document).ready(function(){
         } else {
             par.set("other_tabs", other_tabs + "");
         }
-        history.pushState(null, null, ".?" + par.toString());
+        history.pushState(null, null, "?" + par.toString());
     }
+    // history change
+    addEventListener("popstate", function() {
+        // remove each button
+        $("#tab-button-holder button").each(function () {
+            if (this.id != "open-tab-main") {
+                this.remove();
+            }
+        });
+        // remove each service tab
+        $("#tab-holder .service-tab").each(function() {
+            this.remove();
+        });
+        // unactive active tabs
+        $(".active-tab").each(function() {
+            $(this).removeClass("active-tab");
+        });
+        intalize_tabs();
+    });
 });
 
 </script>
