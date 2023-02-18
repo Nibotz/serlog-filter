@@ -67,7 +67,8 @@ $(document).ready(function(){
     var loaded = 0;
     var max_loaded = false;
     // tab variables
-    var current_tab, other_tabs;
+    var current_tab = "";
+    var other_tabs = new Set();
     // tree filter intalized
     $("#tree-filter").jstree({
         core: {
@@ -93,19 +94,33 @@ $(document).ready(function(){
     // load tabs
     intalize_tabs();
     function intalize_tabs() {
-        // tab variables
+        // variables from url
         let url = new URLSearchParams(location.search);
         current_tab = url.has("current_tab") ? url.get("current_tab") : "main";
-        other_tabs = url.has("other_tabs") ? url.get("other_tabs").split(",") : [];
-        // current tab
-        if (current_tab != "main") {
-            create_tabs([current_tab], current_tab);
-        } else {
-            open_tab("main", true);
+        // tab ids
+        let ids = current_tab == "main" ? "" : current_tab + ",";
+        if (url.has("other_tabs")) {
+            url.get("other_tabs").split(",").forEach(val => {other_tabs.add(val);});
+            ids += url.get("other_tabs") + ",";
         }
-        // closed tabs
-        if (other_tabs.length > 0) {
-            create_tabs(other_tabs, null);
+        // create new tabs from ids
+        if (ids != "") {
+            $.ajax({
+                url: "service_information.php",
+                method: "POST",
+                data: {
+                    get_data: 1,
+                    ids: ids.slice(0,-1)
+                },
+                success:function(rText) {
+                    create_tabs(rText);
+                    $("#tab-" + current_tab).addClass("active-tab");
+                    $("#open-tab-" + current_tab).addClass("active-tab");
+                }
+            });
+        } else {
+            $("#tab-main").addClass("active-tab");
+            $("#open-tab-main").addClass("active-tab");
         }
     }
     // FILTERS + SERVICES
@@ -176,28 +191,28 @@ $(document).ready(function(){
             }
         });
         // loop trough services
-        $.each(services, function(){
-            service_count[this.cat_id]++; // count services by category id
+        services.forEach(val => {
+            service_count[val.cat_id]++; // count services by category id
             // style services
-            html += "<div class='service' id='ser-" + this.id + "'>"; // div start
-            html += "<h3 class='service-name'>" + this.title + "</h3>"; // title
+            html += "<div class='service' id='ser-" + val.id + "'>"; // div start
+            html += "<h3 class='service-name'>" + val.title + "</h3>"; // title
             html += "<p><b>categorization:</b> "; // category start
-            if (this.cat_id == null) {
+            if (val.cat_id == null) {
                 html += "none"; // no category
             } else {
-                html += tree_filter.get_path(this.cat_id, " --> "); // category tree
+                html += tree_filter.get_path(val.cat_id, " --> "); // category tree
             }
             html += "</p><br>"; // category end
-            html += "<p><b>created:</b> " + this.created + "</p>"; // created
-            html += "<p><b>edited:</b> " + this.edited + "</p>"; // edited
-            html += "<p><b>locality:</b> " + this.locality_csv.replace(/_/g, "") + "</p>"; // locality
+            html += "<p><b>created:</b> " + val.created + "</p>"; // created
+            html += "<p><b>edited:</b> " + val.edited + "</p>"; // edited
+            html += "<p><b>locality:</b> " + val.locality_csv.replace(/_/g, "") + "</p>"; // locality
             html += "<p><b>price:</b> "; // price start
-            if (this.minprice === null) {
+            if (val.minprice === null) {
                 html += "none"; // no price
-            } else if (this.minprice == this.maxprice) {
-                html += this.minprice + " &euro;"; // same price
+            } else if (val.minprice == val.maxprice) {
+                html += val.minprice + " &euro;"; // same price
             } else {
-                html += this.minprice + " - " + this.maxprice + " &euro;"; // price range
+                html += val.minprice + " - " + val.maxprice + " &euro;"; // price range
             }
             html += "</p>"; // price end
             html += "</div>"; // div end
@@ -247,102 +262,104 @@ $(document).ready(function(){
     });*/
     // TAB MAKING STUFF
     // create new tab
-    function create_tabs(ids, tab_to_open) {
-        $.ajax({
-            url: "service_information.php",
-            method: "POST",
-            data: {
-                get_data: 1,
-                ids: (ids + "")
-            },
-            success:function(rText) {
-                let sdata = JSON.parse(rText);
-                let html = "";
-                // style each tab
-                $.each(sdata, function() {
-                    html += "<div class='tab service-tab' id='tab-" + this.id + "'>";
-                    html += "<h2>" + this.title + "</h2>";
-                    html += "</div>";
+    function create_tabs(text) {
+        let sdata = JSON.parse(text);
+        let html = "";
+        // style each tab
+        sdata.forEach(val => {
+            html += "<div class='tab service-tab' id='tab-" + val.id + "'>";
+            html += "<h2>" + val.title + "</h2>";
+            html += "</div>";
+        });
+        // append new tabs
+        $("#tab-holder").append(html);
+        // make buttons for each tab
+        sdata.forEach(val => {
+            let id = val.id;
+            // tab buttons made
+            let tab = $("<button class='open-tab' id='open-tab-" + id + "'></button>").text("tab " + id); // tab button
+            let del = $("<button class='del-tab' id='del-tab-" + id + "'></button>").text("X"); // delete button
+            // delete tab event
+            $(del).on("click", function(){
+                $(del).remove();
+                $(tab).slideUp("fast", function(){
+                    if (id == current_tab) {
+                        $("#tab-main").addClass("active-tab");
+                        $("#open-tab-main").addClass("active-tab");
+                        current_tab = "main";
+                    }
+                    other_tabs.delete(id);
+                    update_url();
+                    $(tab).remove();
+                    $("#tab-" + id).remove();
                 });
-                // append new tabs
-                $("#tab-holder").append(html);
-                // make buttons for each tab
-                $.each(sdata, function() {
-                    let id = this.id;
-                    // tab buttons made
-                    let tab = $("<button class='open-tab' id='open-tab-" + id + "'></button>").text("tab " + id); // tab button
-                    let del = $("<button class='del-tab' id='del-tab-" + id + "'></button>").text("X"); // delete button
-                    // delete tab event
-                    $(del).on("click", function(){
-                        $(del).remove();
-                        $(tab).slideUp("fast", function(){
-                            other_tabs.splice(other_tabs.indexOf(id), 1);
-                            if (id == current_tab) {
-                                open_tab("main");
-                            }
-                            update_url();
-                            $(tab).remove();
-                            $("#tab-" + id).remove();
-                        });
-                    });
-                    // open tab event
-                    $(tab).on("click", function(){
-                        open_tab(id);
-                        update_url();
-                    });
-                    // add new buttons
-                    $("#tab-button-holder").append(tab, del);
-                });
-                if (tab_to_open !== null) {
-                    open_tab(tab_to_open, true);
-                }
-            }
+            });
+            // open tab event
+            $(tab).on("click", function(){
+                open_tab(id);
+            });
+            // add new buttons
+            $("#tab-button-holder").append(tab, del);
         });
     }
     // handle greating new tab
     function new_tab(id) {
-        if (current_tab != id && !other_tabs.includes(id)) {
-            create_tabs([id], id);
+        // make a new tab
+        if (!other_tabs.has(id)) {
+            $.ajax({
+                url: "service_information.php",
+                method: "POST",
+                data: {
+                    get_data: 1,
+                    ids: id
+                },
+                success:function(rText) {
+                    create_tabs(rText);
+                    open_tab(id);
+                }
+            });
+        // open the old tab
         } else {
             open_tab(id);
         }
-        update_url();
     }
     // opening main tab
     $("#open-tab-main").on("click", function(){
         open_tab("main");
-        update_url();
     });
     // handle changing tab
-    function open_tab(id, forced=false) {
-        if (current_tab != id || forced) {
+    function open_tab(id) {
+        if (current_tab != id) {
             // old tab
             if ($("#open-tab-" + current_tab).hasClass("active-tab")) {
                 $("#tab-" + current_tab).removeClass("active-tab");
                 $("#open-tab-" + current_tab).removeClass("active-tab");
                 if (current_tab != "main") {
-                    other_tabs.push(current_tab);
+                    other_tabs.add(current_tab);
                 }
             }
             // new tab
             $("#tab-" + id).addClass("active-tab");
             $("#open-tab-" + id).addClass("active-tab");
-            if (other_tabs.includes(id)) {
-                other_tabs.splice(other_tabs.indexOf(id), 1);
+            if (other_tabs.has(id)) {
+                other_tabs.delete(id);
             }
             current_tab = id;
+            update_url();
         }
     }
     // update url
     function update_url() {
         let par = new URLSearchParams(location.search);
         par.set("current_tab", current_tab);
-        if (other_tabs.length == 0) {
+        if (other_tabs.size == 0) {
             par.delete("other_tabs");
         } else {
-            par.set("other_tabs", other_tabs + "");
+            let ids = "";
+            other_tabs.forEach(val => {ids += val + ",";});
+            par.set("other_tabs", ids.slice(0,-1));
         }
-        history.pushState(null, null, "?" + par.toString());
+        history.pushState(null, "", "?" + par.toString());
     }
     // history change
     addEventListener("popstate", function() {
