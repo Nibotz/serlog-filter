@@ -62,10 +62,8 @@
 
 <script>
 $(document).ready(function(){
-    // intalize (infinite scroll) variables (doesn't work D:)
-    const LOAD_LIMIT = 20;
-    var loaded = 0;
-    var max_loaded = false;
+    // services stored
+    var services = [];
     // tab variables
     var current_tab = "";
     var other_tabs = new Set();
@@ -125,28 +123,20 @@ $(document).ready(function(){
     }
     // FILTERS + SERVICES
     // change filter
-    function filter_change(new_filters=true){
-        if (new_filters) {
-            loaded = 0;
-            max_loaded = false;
-            $(document).scrollTop(0);
-        }
-        // arrays are made
+    function filter_change(){
+        // locality
         let locality = [];
         $("input[name='available']:checked").each(function(){
             locality.push(this.value);
         });
-        let categories = tree_filter.get_selected();
         // ajax call
         $.ajax({
             url: "filter_services.php",
             method: "POST",
             data: {
                 get_data: 1,
-                load_start: loaded,
-                load_limit: LOAD_LIMIT,
+                load_limit: 30,
                 locality: locality,
-                categories: JSON.stringify(categories).slice(1, -1),
                 price1: $("input[name='price1']").val(),
                 price2: $("input[name='price2']").val(),
                 created1: $("input[name='created1']").val(),
@@ -155,44 +145,36 @@ $(document).ready(function(){
                 edited2: $("input[name='edited2']").val()
             },
             success:function(rText){
-                html = process_services(rText);
-                if (html === "") {
-                    max_loaded = true;
-                    if (new_filters) {
-                        $("#service-holder").html("<p class='empty'>*No data found</p>");
-                    }
-                } else {
-                    if (new_filters) {
-                        $("#service-holder").html(html);
-                    } else {
-                        $("#service-holder").append(html);
-                    }
-                    loaded += LOAD_LIMIT;
-                }
-                // get service presses
-                $("div.service").on("click", function(){
-                    new_tab(this.id.slice(4));
-                });
+                services = JSON.parse(rText);
+                update_services();
             }
         });
     }
     // process services
-    function process_services(json_filters){
-        let services = JSON.parse(json_filters);
+    function update_services() {
         let html = "";
-        // count services
+        // reset service count
         let service_count = [];
         $.each(tree_filter.get_json("#", {flat: true}), function(){
             service_count[this.id] = 0;
             // remove count from the end
-            let p = this.text.search(" \\(");
+            const p = this.text.lastIndexOf(" ");
             if (p != -1) {
                 tree_filter.set_text(this, this.text.slice(0, p));
             }
         });
+        // get selected services
+        const selected_services = new Set(tree_filter.get_selected());
+        let num = 0;
         // loop trough services
-        services.forEach(val => {
-            service_count[val.cat_id]++; // count services by category id
+        for (let i = 0; i < services.length; i++) {
+            const val = services[i];
+            service_count[val.cat_id]++;
+            // filter selected services
+            if (selected_services.size && !selected_services.has(val.cat_id)) {
+                continue;
+            }
+            num++;
             // style services
             html += "<div class='service' id='ser-" + val.id + "'>"; // div start
             html += "<h3 class='service-name'>" + val.title + "</h3>"; // title
@@ -216,7 +198,8 @@ $(document).ready(function(){
             }
             html += "</p>"; // price end
             html += "</div>"; // div end
-        });
+        }
+        html = "<p>services found: " + num + "</p>" + html;
         // add child services to count
         function add_childs(node){
             let child_count = 0;
@@ -227,13 +210,18 @@ $(document).ready(function(){
             tree_filter.set_text(node, node.text + " (" + num + ")");
             return num;
         }
-        let num = 0;
+        // total number of services
+        num = 0;
         $.each(tree_filter.get_json(), function(){
             num += add_childs(this);
         });
         $("#selectAll-text").html("Select all (" + num + ")");
-        // return styled services
-        return html;
+        // add styled services
+        $("#service-holder").html(html);
+        // get when service is pressed
+        $("div.service").on("click", function(){
+            new_tab(this.id.slice(4));
+        });
     }
     // BUTTON ACTION
     // select all button
@@ -243,23 +231,18 @@ $(document).ready(function(){
         } else {
             tree_filter.uncheck_all();
         }
+        update_services();
     });
     // get filter change
-    $("input").change(function(){
+    $("input:not(#selectAll)").change(function(){
         filter_change();
     });
     // get tree filter change
     $("#tree-filter").on("changed.jstree", function(n, e){
         if (e.action === "select_node" || e.action === "deselect_node") {
-            filter_change();
+            update_services();
         }
     }).jstree();
-    // get when scrolled to bottom (broken currently)
-    /*$(window).scroll(function(){
-        if(!max_loaded && $(document).height() - $(window).height() - $(window).scrollTop() < 1) {
-            filter_change(false);
-        }
-    });*/
     // TAB MAKING STUFF
     // create new tab
     function create_tabs(text) {

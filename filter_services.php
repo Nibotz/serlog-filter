@@ -23,10 +23,6 @@ if (isset($_POST["locality"]) && !empty($_POST["locality"])) {
     }
     $query .= ")";
 }
-// categories filter
-if ($_POST["categories"] !== "") {
-    $query .= "AND(s.js_tree_cat IN (" . $_POST["categories"] . "))";
-}
 // price filters using services_childs
 if ($_POST["price1"] !== "" && ctype_digit($_POST["price1"])) {
     $query .= "AND(" . $_POST["price1"] . " <= (SELECT MAX(sc.child_price) FROM services_childs AS sc WHERE s.id = sc.par_srv_id))";
@@ -49,7 +45,7 @@ if ($_POST["edited2"] !== "" && $_POST["edited2"][0] !== "0") {
     $query .= "AND('" . $_POST["edited2"] . "' >= s.edited)";
 }
 // sorting and limits
-$query .= "GROUP BY s.id ORDER BY s.title LIMIT " . $_POST["load_start"] . ", " . $_POST["load_limit"] . ";";
+$query .= "GROUP BY s.id ORDER BY s.title LIMIT " . $_POST["load_limit"] . ";";
 
 // run the command
 $table = $conn->query($query);
