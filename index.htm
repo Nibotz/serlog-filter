@@ -72,17 +72,13 @@ $(document).ready(function(){
         core: {
             data: {
                 method: "POST",
-                data: {
-                    get_data: 1
-                },
+                data: {get_data: 1},
                 url: "make_tree.php",
                 dataType: "json"
             }
         },
         plugins: ["checkbox", "wholerow"],
-        checkbox: {
-            keep_selected_style: 0
-        }
+        checkbox: {keep_selected_style: 0}
     });
     const tree_filter = $("#tree-filter").jstree();
     // other filters intalized (after tree filter)
@@ -219,7 +215,7 @@ $(document).ready(function(){
         // add styled services
         $("#service-holder").html(html);
         // get when service is pressed
-        $("div.service").on("click", function(){
+        $("#tab-main div.service").on("click", function(){
             new_tab(this.id.slice(4));
         });
     }
@@ -234,7 +230,7 @@ $(document).ready(function(){
         update_services();
     });
     // get filter change
-    $("input:not(#selectAll)").change(function(){
+    $("#tab-main input:not(#selectAll)").change(function(){
         filter_change();
     });
     // get tree filter change
