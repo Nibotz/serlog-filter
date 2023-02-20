@@ -13,7 +13,7 @@
 
 <div id="tab-button-holder">
     <h2>Tabs</h2>
-    <button class="open-tab" id="open-tab-main">services</button>
+    <button class="open-tab static-tab" id="open-tab-main">services</button>
     <!-- new tab buttons here -->
 </div>
 
@@ -73,7 +73,7 @@ $(document).ready(function(){
             data: {
                 method: "POST",
                 data: {get_data: 1},
-                url: "make_tree.php",
+                url: "php/make_tree.php",
                 dataType: "json"
             }
         },
@@ -91,8 +91,9 @@ $(document).ready(function(){
         // variables from url
         let url = new URLSearchParams(location.search);
         current_tab = url.has("current_tab") ? url.get("current_tab") : "main";
+        other_tabs.clear();
         // tab ids
-        let ids = current_tab == "main" ? "" : current_tab + ",";
+        let ids = isNaN(current_tab) ? "" : current_tab + ",";
         if (url.has("other_tabs")) {
             url.get("other_tabs").split(",").forEach(val => {other_tabs.add(val);});
             ids += url.get("other_tabs") + ",";
@@ -100,7 +101,7 @@ $(document).ready(function(){
         // create new tabs from ids
         if (ids != "") {
             $.ajax({
-                url: "service_information.php",
+                url: "php/service_information.php",
                 method: "POST",
                 data: {
                     get_data: 1,
@@ -113,8 +114,8 @@ $(document).ready(function(){
                 }
             });
         } else {
-            $("#tab-main").addClass("active-tab");
-            $("#open-tab-main").addClass("active-tab");
+            $("#tab-" + current_tab).addClass("active-tab");
+            $("#open-tab-" + current_tab).addClass("active-tab");
         }
     }
     // FILTERS + SERVICES
@@ -127,7 +128,7 @@ $(document).ready(function(){
         });
         // ajax call
         $.ajax({
-            url: "filter_services.php",
+            url: "php/filter_services.php",
             method: "POST",
             data: {
                 get_data: 1,
@@ -154,9 +155,8 @@ $(document).ready(function(){
         $.each(tree_filter.get_json("#", {flat: true}), function(){
             service_count[this.id] = 0;
             // remove count from the end
-            const p = this.text.lastIndexOf(" ");
-            if (p != -1) {
-                tree_filter.set_text(this, this.text.slice(0, p));
+            if (this.text.endsWith(")")) {
+                tree_filter.set_text(this, this.text.slice(0, this.text.lastIndexOf(" ")));
             }
         });
         // get selected services
@@ -195,7 +195,7 @@ $(document).ready(function(){
             html += "</p>"; // price end
             html += "</div>"; // div end
         }
-        html = "<p>services found: " + num + "</p>" + html;
+        //html = "<p>services found: " + num + "</p>" + html;
         // add child services to count
         function add_childs(node){
             let child_count = 0;
@@ -286,7 +286,7 @@ $(document).ready(function(){
         // make a new tab
         if (!other_tabs.has(id)) {
             $.ajax({
-                url: "service_information.php",
+                url: "php/service_information.php",
                 method: "POST",
                 data: {
                     get_data: 1,
@@ -303,8 +303,8 @@ $(document).ready(function(){
         }
     }
     // opening main tab
-    $("#open-tab-main").on("click", function(){
-        open_tab("main");
+    $("button.static-tab").on("click", function(){
+        open_tab(this.id.slice(9));
     });
     // handle changing tab
     function open_tab(id) {
@@ -313,7 +313,7 @@ $(document).ready(function(){
             if ($("#open-tab-" + current_tab).hasClass("active-tab")) {
                 $("#tab-" + current_tab).removeClass("active-tab");
                 $("#open-tab-" + current_tab).removeClass("active-tab");
-                if (current_tab != "main") {
+                if (!isNaN(current_tab)) {
                     other_tabs.add(current_tab);
                 }
             }
@@ -343,10 +343,8 @@ $(document).ready(function(){
     // history change
     addEventListener("popstate", function() {
         // remove each button
-        $("#tab-button-holder button").each(function () {
-            if (this.id != "open-tab-main") {
-                this.remove();
-            }
+        $("#tab-button-holder button:not(.static-tab)").each(function () {
+            this.remove();
         });
         // remove each service tab
         $("#tab-holder .service-tab").each(function() {
