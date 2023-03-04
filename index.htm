@@ -6,7 +6,10 @@
     <script src="jquery/jquery-3.6.3.min.js"></script>
     <script src="jquery/jstree.min.js"></script>
     <link rel="stylesheet" href="dist/style.min.css">
+    <link rel="stylesheet" href="css/general_styles.css">
+    <link rel="stylesheet" href="css/make_service_styles.css">
     <link rel="stylesheet" href="css/filter_styles.css">
+    <link rel="stylesheet" href="css/service_styles.css">
 </head>
 <body>
 
@@ -14,6 +17,7 @@
 <div id="tab-button-holder">
     <h2>Tabs</h2>
     <button class="open-tab static-tab" id="open-tab-main">services</button>
+    <button class="open-tab static-tab" id="open-tab-make">make service</button>
     <!-- new tab buttons here -->
 </div>
 
@@ -26,8 +30,8 @@
             <h2>Filters</h2>
             <div class="filter">
                 <h3>Service available</h3>
-                <input type="checkbox" name="available" value="locally"> Locally
-                <input type="checkbox" name="available" value="online"> Online
+                <input type="checkbox" name="locality" value="locally"><span> Locally</span>
+                <input type="checkbox" name="locality" value="online"><span> Online</span>
             </div>
             <div class="filter">
                 <h3>Price(&euro;)</h3>
@@ -57,6 +61,33 @@
             <br>
         </div>
     </div>
+    <div class="tab" id="tab-make">
+        <h2>Add service</h2>
+        <h3>Upload images</h3>
+        <input type="file" name="image">
+        <h3>Categorization</h3>
+        <select name="tree_cat" id="make-tree_cat">
+            <!-- main categories here -->
+        </select>
+        <h3>Contact information</h3>
+        <h4>Private email</h4>
+        <input type="email" name="email" placeholder="johndoe@example.com">
+        <h4>Website</h4>
+        <input type="url" name="website" placeholder="Website (optional)">
+        <h4>Service available</h4>
+        <input type="checkbox" name="locality" value="locally"><span> locally</span>
+        <input type="checkbox" name="locality" value="online"><span> online</span>
+        <h4>Location</h4>
+        <input type="text" name="location" placeholder="Enter street or city">
+        <h4>Title</h4>
+        <input type="text" name="title" placeholder="Title">
+        <h4>Description</h4>
+        <textarea name="description" placeholder="Description" cols="40" rows="10"></textarea>
+        <br><br>
+        <button id="make-reset">Reset</button>
+        <button id="make-upload">Upload media</button>
+        <br><br>
+    </div>
     <!-- new tabs here -->
 </div>
 
@@ -80,9 +111,10 @@ $(document).ready(function(){
         plugins: ["checkbox", "wholerow"],
         checkbox: {keep_selected_style: 0}
     });
-    const tree_filter = $("#tree-filter").jstree();
+    const tree_filter = $("#tree-filter").jstree(true);
     // other filters intalized (after tree filter)
-    $("#tree-filter").on("ready.jstree", function(){
+    $("#tree-filter").on("ready.jstree", function() {
+        service_cats();
         filter_change();
     });
     // load tabs
@@ -123,7 +155,7 @@ $(document).ready(function(){
     function filter_change(){
         // locality
         let locality = [];
-        $("input[name='available']:checked").each(function(){
+        $("#filter-holder input[name='locality']:checked").each(function(){
             locality.push(this.value);
         });
         // ajax call
@@ -134,12 +166,12 @@ $(document).ready(function(){
                 get_data: 1,
                 load_limit: 30,
                 locality: locality,
-                price1: $("input[name='price1']").val(),
-                price2: $("input[name='price2']").val(),
-                created1: $("input[name='created1']").val(),
-                created2: $("input[name='created2']").val(),
-                edited1: $("input[name='edited1']").val(),
-                edited2: $("input[name='edited2']").val()
+                price1: $("#filter-holder input[name='price1']").val(),
+                price2: $("#filter-holder  input[name='price2']").val(),
+                created1: $("#filter-holder input[name='created1']").val(),
+                created2: $("#filter-holder input[name='created2']").val(),
+                edited1: $("#filter-holder input[name='edited1']").val(),
+                edited2: $("#filter-holder input[name='edited2']").val()
             },
             success:function(rText){
                 services = JSON.parse(rText);
@@ -183,7 +215,7 @@ $(document).ready(function(){
             html += "</p><br>"; // category end
             html += "<p><b>created:</b> " + val.created + "</p>"; // created
             html += "<p><b>edited:</b> " + val.edited + "</p>"; // edited
-            html += "<p><b>locality:</b> " + val.locality_csv.replace(/_/g, "") + "</p>"; // locality
+            html += "<p><b>locality:</b> " + val.locality + "</p>"; // locality
             html += "<p><b>price:</b> "; // price start
             if (val.minprice === null) {
                 html += "none"; // no price
@@ -219,6 +251,61 @@ $(document).ready(function(){
             new_tab(this.id.slice(4));
         });
     }
+    // SERVICE MAKING
+    function service_cats() {
+        let cats = "<option value=''></option>";
+        $.each(tree_filter.get_json("#", {flat: true}), function(){
+            cats += "<option value='" + this.id + "'>";
+            cats += this.text;
+            cats += "</option>";
+        });
+        $("#make-tree_cat").html(cats);
+    }
+    $("#make-reset").on("click", make_clear);
+    $("#make-upload").on("click", function() {
+        let locality = [];
+        $("#tab-make input[name='locality']:checked").each(function(){
+            locality.push(this.value);
+        });
+        let title = $("#tab-make input[name='title']").val().trim();
+        let js_tree_cat = $("#tab-make #make-tree_cat").val();
+        let location = $("#tab-make input[name='location']").val();
+        let email_srv = $("#tab-make input[name='email']").val();
+        let url = $("#tab-make input[name='website']").val();
+        // validition
+        if (!locality.length || !title || !js_tree_cat || !email_srv || !location) {
+            alert("not a valid service!");
+            return;
+        }
+        $.ajax({
+            url: "php/make_service.php",
+            method: "POST",
+            data: {
+                set_data: 1,
+                title: title,
+                locality: locality.toString(),
+                js_tree_cat: js_tree_cat,
+                location: location,
+                email_srv: email_srv,
+                url: url
+            },
+            success:function(rText) {
+                make_clear();
+            }
+        });
+    });
+    // clear input field
+    function make_clear() {
+        $("#tab-make input[name='locality']:checked").each(function(){
+            this.checked = false;
+        });
+        $("#tab-make #make-tree_cat")[0].value = "";
+        $("#tab-make input[name='email']")[0].value = "";
+        $("#tab-make input[name='website']")[0].value = "";
+        $("#tab-make input[name='location']")[0].value = "";
+        $("#tab-make input[name='title']")[0].value = "";
+        $("#tab-make textarea[name='description']")[0].value = "";
+    }
     // BUTTON ACTION
     // select all button
     $("#selectAll").change(function(){
@@ -230,9 +317,7 @@ $(document).ready(function(){
         update_services();
     });
     // get filter change
-    $("#tab-main input:not(#selectAll)").change(function(){
-        filter_change();
-    });
+    $("#tab-main input:not(#selectAll)").on("change", filter_change);
     // get tree filter change
     $("#tree-filter").on("changed.jstree", function(n, e){
         if (e.action === "select_node" || e.action === "deselect_node") {
@@ -240,6 +325,10 @@ $(document).ready(function(){
         }
     }).jstree();
     // TAB MAKING STUFF
+    // opening main tab
+    $("button.static-tab").on("click", function(){
+        open_tab(this.id.slice(9));
+    });
     // create new tab
     function create_tabs(text) {
         let sdata = JSON.parse(text);
@@ -248,10 +337,33 @@ $(document).ready(function(){
         sdata.forEach(val => {
             html += "<div class='tab service-tab' id='tab-" + val.id + "'>";
             html += "<h2>" + val.title + "</h2>";
+            html += "<button class='delete-service' id='service-del-" + val.id + "'>delete service</button>";
+            html += "<button class='add-subservice' id='service-del-" + val.id + "'>add subservice</button>";
             html += "</div>";
         });
         // append new tabs
         $("#tab-holder").append(html);
+        // button event handlers
+        $("button.delete-service").on("click", function() {
+            let id = this.id.slice(12);
+            if (confirm("Are you sure?\nYou cannot undo this action.")) {
+                $.ajax({
+                    url: "php/delete_service.php",
+                    method: "POST",
+                    data: {
+                        set_data: 1,
+                        id: id
+                    },
+                    success:function(rText) {
+                        delete_tab(id);
+                        filter_change();
+                    }
+                });
+            }
+        });
+        $("button.add-subservice").on("click", function() {
+            alert("not implemented yet...");
+        });
         // make buttons for each tab
         sdata.forEach(val => {
             let id = val.id;
@@ -259,26 +371,26 @@ $(document).ready(function(){
             let tab = $("<button class='open-tab' id='open-tab-" + id + "'></button>").text("tab " + id); // tab button
             let del = $("<button class='del-tab' id='del-tab-" + id + "'></button>").text("X"); // delete button
             // delete tab event
-            $(del).on("click", function(){
-                $(del).remove();
-                $(tab).slideUp("fast", function(){
-                    if (id == current_tab) {
-                        $("#tab-main").addClass("active-tab");
-                        $("#open-tab-main").addClass("active-tab");
-                        current_tab = "main";
-                    }
-                    other_tabs.delete(id);
-                    update_url();
-                    $(tab).remove();
-                    $("#tab-" + id).remove();
-                });
-            });
+            $(del).on("click", function() {delete_tab(id);});
             // open tab event
-            $(tab).on("click", function(){
-                open_tab(id);
-            });
+            $(tab).on("click", function() {open_tab(id);});
             // add new buttons
             $("#tab-button-holder").append(tab, del);
+        });
+    }
+    // handle deleting tab
+    function delete_tab(id) {
+        $("#del-tab-" + id).remove();
+        $("#open-tab-" + id).slideUp("fast", function(){
+            if (id == current_tab) {
+                $("#tab-main").addClass("active-tab");
+                $("#open-tab-main").addClass("active-tab");
+                current_tab = "main";
+            }
+            other_tabs.delete(id);
+            update_url();
+            $("#open-tab-" + id).remove();
+            $("#tab-" + id).remove();
         });
     }
     // handle greating new tab
@@ -302,10 +414,6 @@ $(document).ready(function(){
             open_tab(id);
         }
     }
-    // opening main tab
-    $("button.static-tab").on("click", function(){
-        open_tab(this.id.slice(9));
-    });
     // handle changing tab
     function open_tab(id) {
         if (current_tab != id) {

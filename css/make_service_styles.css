@@ -1,0 +1,26 @@
+/* service making form */
+#tab-make {
+    width: 90%;
+    padding: 10px;
+    background-color: #5f9ea0;
+    overflow: auto;
+}
+
+#tab-make h4 {
+    margin: 10px 0;
+}
+
+#tab-make input:not([type='checkbox']) {
+    width: 80%;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+#tab-make textarea {
+    font-family: Arial, Helvetica, sans-serif;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    resize: both;
+}

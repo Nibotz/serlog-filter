@@ -1,68 +1,3 @@
-/* BODY */
-body {
-    box-sizing: border-box;
-    background-color: #808080;
-    margin: 0;
-    font-family: 'Courier New', Courier, monospace;
-}
-/* MAIN DIVS */
-#tab-holder {
-    position: fixed;
-    left: 15%;
-    width: 85%;
-    height: 100%;
-}
-#tab-button-holder {
-    position: fixed;
-    width: 15%;
-    height: 100%;
-    background-color: #d3d3d3;
-    overflow: auto;
-}
-/* TAB BUTTONS */
-#tab-button-holder button.open-tab {
-    float: left;
-    width: 80%;
-    height: 40px;
-    margin-top: 5px;
-    margin-left: 2px;
-    padding: 10px;
-    border: 2px solid #000000;
-    border-radius: 8px;
-    background-color: #5f9ea0;
-}
-#tab-button-holder button.open-tab:hover {
-    background-color: #008b8b;
-}
-#tab-button-holder button.active-tab {
-    border-color: #ff0000;
-}
-#tab-button-holder button.del-tab {
-    float: left;
-    margin: 15px 5px;
-    width: 20px;
-    height: 20px;
-    background-color: inherit;
-    border: none;
-}
-#tab-button-holder button.del-tab:hover {
-    background-color: #808080;
-    border-radius: 50%;
-}
-/* TABS */
-#tab-holder div.tab {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: none;
-}
-#tab-holder div.active-tab {
-    display: block;
-}
-#tab-holder div.service-tab {
-    background-color: #1515d0;
-}
-/* filters holder */
 #filter-holder {
     position: absolute;
     right: 0;
@@ -73,32 +8,22 @@ body {
     height: 100%;
     overflow: auto;
 }
-/* services holder */
-#service-holder {
-    position: absolute;
-    width: 70%;
-    height: 100%;
-    background-color: #5f9ea0;
-    overflow: auto;
-}
-/* HEADINGS */
-h2 {
-    text-align: center;
-}
 #filter-holder h2 {
+    text-align: center;
     padding-bottom: 20px;
     border-bottom: 2px solid #ffffff;
 }
-/* INDIVIDUAL FILTER DIVS */
+
+/* filter divs */
 div.filter {
     margin-left: 10px;
 }
-/* inside filter divs */
 div.filter input {
     margin: 10px 2px;
-    border-radius: 4px;
+    padding: 5px;
+    border-radius: 5px;
     border-color: #000000;
-    max-width: 40%;
+    max-width: 35%;
 }
 div.filter h3 {
     margin: 0;
@@ -106,29 +31,4 @@ div.filter h3 {
 }
 div.filter #selectAll {
     margin-left: 30px;
-}
-/* NO DATA */
-#service-holder p.empty {
-    color: #000000;
-    margin-left: 20px;
-}
-/* INDIVIDUAL SERVICES */
-div.service {
-    width: 80%;
-    height: 250px;
-    margin: 10px auto;
-    background-color: #87cefa;
-    border: 3px solid #00008b;
-    border-radius: 10px;
-}
-div.service:hover {
-    border-color: #ff0000;
-}
-div.service h3 {
-    text-align: center;
-    padding-bottom: 10px;
-    border-bottom: 6px double #00008b;
-}
-div.service p {
-    margin: 10px;
 }

@@ -8,7 +8,7 @@ include("db_connection.php");
 $conn = openConn("serlog");
 
 // creating sql command from data
-$query = "SELECT s.id, s.title, s.created, s.edited, s.locality_csv, 
+$query = "SELECT s.id, s.title, s.created, s.edited, s.locality, 
 MIN(sc.child_price) AS minprice, MAX(sc.child_price) AS maxprice, c.id AS cat_id
 FROM services AS s
 LEFT JOIN services_childs AS sc ON s.id = sc.par_srv_id
@@ -17,9 +17,9 @@ WHERE 1 ";
 
 // local/online filter
 if (isset($_POST["locality"]) && !empty($_POST["locality"])) {
-    $query .= "AND(s.locality_csv LIKE '%" . $_POST["locality"][0] . "%'";
+    $query .= "AND(s.locality LIKE '%" . $_POST["locality"][0] . "%'";
     for ($i=1; $i < count($_POST["locality"]); $i++) {
-        $query .= " AND s.locality_csv LIKE '%" . $_POST["locality"][$i] . "%'";
+        $query .= " AND s.locality LIKE '%" . $_POST["locality"][$i] . "%'";
     }
     $query .= ")";
 }

@@ -1,0 +1,43 @@
+/* services holder */
+#service-holder {
+    position: absolute;
+    width: 70%;
+    height: 100%;
+    background-color: #5f9ea0;
+    overflow: auto;
+}
+
+/* no data */
+#service-holder p.empty {
+    color: #000000;
+    margin-left: 20px;
+}
+/* services in main tab */
+div.service {
+    width: 80%;
+    height: 250px;
+    margin: 10px auto;
+    background-color: #87cefa;
+    border: 3px solid #00008b;
+    border-radius: 10px;
+}
+div.service:hover {
+    border-color: #ff0000;
+}
+div.service h3 {
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 6px double #00008b;
+}
+div.service p {
+    margin: 10px;
+}
+
+/* services in other tabs */
+div.service-tab {
+    background-color: darkslategrey;
+}
+
+div.service-tab h2 {
+    text-align: center;
+}
