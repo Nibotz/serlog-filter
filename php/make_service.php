@@ -7,7 +7,7 @@ include("db_connection.php");
 $conn = openConn("serlog");
 
 // values to insert into database
-$VALS = ["title", "locality", "js_tree_cat", "location", "email_srv", "url"];
+$VALS = ["title", "locality", "js_tree_cat", "location", "email_srv", "url", "description"];
 // loop trough them
 $keys = "(";
 $values = "(";

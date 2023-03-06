@@ -199,33 +199,33 @@ $(document).ready(function(){
             const val = services[i];
             service_count[val.cat_id]++;
             // filter selected services
-            if (selected_services.size && !selected_services.has(val.cat_id)) {
-                continue;
-            }
+            if (selected_services.size && !selected_services.has(val.cat_id)) {continue;}
             num++;
             // style services
-            html += "<div class='service' id='ser-" + val.id + "'>"; // div start
-            html += "<h3 class='service-name'>" + val.title + "</h3>"; // title
-            html += "<p><b>categorization:</b> "; // category start
-            if (val.cat_id == null) {
-                html += "none"; // no category
-            } else {
-                html += tree_filter.get_path(val.cat_id, " --> "); // category tree
-            }
-            html += "</p><br>"; // category end
-            html += "<p><b>created:</b> " + val.created + "</p>"; // created
-            html += "<p><b>edited:</b> " + val.edited + "</p>"; // edited
-            html += "<p><b>locality:</b> " + val.locality + "</p>"; // locality
-            html += "<p><b>price:</b> "; // price start
-            if (val.minprice === null) {
-                html += "none"; // no price
-            } else if (val.minprice == val.maxprice) {
-                html += val.minprice + " &euro;"; // same price
-            } else {
-                html += val.minprice + " - " + val.maxprice + " &euro;"; // price range
-            }
-            html += "</p>"; // price end
-            html += "</div>"; // div end
+            html += "<div class='service' id='ser-" + val.id + "'>";
+            // title
+            html += "<div class='top'><h3 class='service-name'>" + val.title + "</h3></div>";
+            // description
+            html += "<div class='middle'><p>" + val.description + "</p></div>";
+            // category
+            html += "<div class='bottom'><p class='name' style='width:fit-content;'>Categorization&ensp;</p><p>";
+            if (val.cat_id == null) {html += "none";} // no category
+            else {html += tree_filter.get_path(val.cat_id, " > ");} // category tree
+            html += "</p></div>";
+            // left side
+            html += "<div class='corner'>";
+            html += "<p class='name'>Price</p><p>"; // price start
+            if (val.minprice === null) {html += "none";} // no price
+            else if (val.minprice == val.maxprice) {html += val.minprice + " &euro;";} // same price
+            else {html += val.minprice + " - " + val.maxprice + " &euro;";} // price range
+            html += "</p><br>"; // price end
+            html += "<p class='name'>Locality</p><p>" + val.locality + "</p></div>"; // locality
+            // right side
+            html += "<div class='corner'>";
+            html += "<p class='name'>Created</p><p>" + val.created + "</p><br>"; // created
+            html += "<p class='name'>Edited</p><p>" + val.edited + "</p><br>"; // edited
+            html += "<p class='name'>ID</p><p>" + val.id + "</p><br>"; // id
+            html += "</div></div>";
         }
         //html = "<p>services found: " + num + "</p>" + html;
         // add child services to count
@@ -272,8 +272,9 @@ $(document).ready(function(){
         let location = $("#tab-make input[name='location']").val();
         let email_srv = $("#tab-make input[name='email']").val();
         let url = $("#tab-make input[name='website']").val();
+        let description = $("#tab-make textarea[name='description']").val().replaceAll("\n", "<br>");
         // validition
-        if (!locality.length || !title || !js_tree_cat || !email_srv || !location) {
+        if (!locality.length || !title || !js_tree_cat || !email_srv || !location || !description) {
             alert("not a valid service!");
             return;
         }
@@ -287,7 +288,8 @@ $(document).ready(function(){
                 js_tree_cat: js_tree_cat,
                 location: location,
                 email_srv: email_srv,
-                url: url
+                url: url,
+                description: description
             },
             success:function(rText) {
                 make_clear();
@@ -337,6 +339,7 @@ $(document).ready(function(){
         sdata.forEach(val => {
             html += "<div class='tab service-tab' id='tab-" + val.id + "'>";
             html += "<h2>" + val.title + "</h2>";
+            html += "<p>" + val.description + "</p>";
             html += "<button class='delete-service' id='service-del-" + val.id + "'>delete service</button>";
             html += "<button class='add-subservice' id='service-del-" + val.id + "'>add subservice</button>";
             html += "</div>";

@@ -10,7 +10,7 @@
     margin: 10px 0;
 }
 
-#tab-make input:not([type='checkbox']) {
+#tab-make input:not([type='checkbox']):not([type='file']) {
     width: 80%;
     border: none;
     border-radius: 5px;

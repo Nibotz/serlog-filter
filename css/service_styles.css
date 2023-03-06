@@ -1,5 +1,6 @@
 /* services holder */
 #service-holder {
+    font-family: Georgia, 'Times New Roman', Times, serif;
     position: absolute;
     width: 70%;
     height: 100%;
@@ -7,35 +8,48 @@
     overflow: auto;
 }
 
-/* no data */
-#service-holder p.empty {
-    color: #000000;
-    margin-left: 20px;
-}
 /* services in main tab */
 div.service {
+    position: relative;
     width: 80%;
-    height: 250px;
+    height: 300px;
     margin: 10px auto;
-    background-color: #87cefa;
-    border: 3px solid #00008b;
+    background-color: #ffffff;
+    border: 5px solid #a9bcce;
     border-radius: 10px;
+    transition: box-shadow 1s;
 }
 div.service:hover {
-    border-color: #ff0000;
+    box-shadow: 0 0 5px 7px rgba(50, 50, 200, 0.5);
 }
+
 div.service h3 {
-    text-align: center;
-    padding-bottom: 10px;
-    border-bottom: 6px double #00008b;
+    margin: 5px;
 }
 div.service p {
-    margin: 10px;
+    display: inline;
+    margin: 0;
 }
+div.service p.name {
+    display: inline-block;
+    font-weight: bold;
+    width: 4.5em;
+}
+div.service div {
+    float: left;
+    padding: 5px;
+    border: 1px solid #a9bcce;
+    overflow-y: auto;
+}
+div.service div.corner {width: 50%; height: 25%;}
+div.service div.bottom {width: 100%; max-height: 17%;}
+div.service div.middle {width: 100%; min-height: 30%; max-height: 44%;}
+div.service div.top {width: 100%; height: 15%;}
 
 /* services in other tabs */
 div.service-tab {
-    background-color: darkslategrey;
+    background-color: salmon;
+    padding-left: 10px;
 }
 
 div.service-tab h2 {
