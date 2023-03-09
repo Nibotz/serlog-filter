@@ -232,13 +232,16 @@ $(document).ready(function(){
             else if (val.minprice == val.maxprice) {html += val.minprice + " &euro;";} // same price
             else {html += val.minprice + " - " + val.maxprice + " &euro;";} // price range
             html += "</p><br>"; // price end
-            html += "<p class='name'>Locality</p><p>" + val.locality + "</p></div>"; // locality
+            html += "<p class='name'>Locality</p><p>" + val.locality + "</p><br>"; // locality
+            html += "<p class='name'>Location</p><p>" + val.location + "</p><br>" // location
+            html += "<p class='name'>Url</p><p>" + val.url + "</p></div>" // url
             // right side
             html += "<div class='corner'>";
             html += "<p class='name'>Created</p><p>" + val.created + "</p><br>"; // created
             html += "<p class='name'>Edited</p><p>" + val.edited + "</p><br>"; // edited
-            html += "<p class='name'>ID</p><p>" + val.id + "</p><br>"; // id
-            html += "</div></div>";
+            html += "<p class='name'>Email</p><p>" + val.email_srv + "</p><br>"; // email
+            html += "<p class='name'>Phone</p><p>" + val.phone_srv + "</p></div>"; // phone
+            html += "</div>";
         }
         //html = "<p>services found: " + num + "</p>" + html;
         // add child services to count
