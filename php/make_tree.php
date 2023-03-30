@@ -16,8 +16,8 @@ $table = $conn->query($query);
 $output = [];
 while ($row = $table->fetch_assoc()) {
     $output[] = [
-        "id" => $row["id"],
-        "parent" => $row["parent_id"] == 0 ? "#" : $row["parent_id"],
+        "id" => ($_POST["_id"] . $row["id"]),
+        "parent" => $row["parent_id"] == 0 ? "#" : ($_POST["_id"] . $row["parent_id"]),
         "text" => trim(str_replace("_", " ", $row["name"])),
         "icon" => false
     ];
