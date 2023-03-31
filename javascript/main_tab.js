@@ -1,10 +1,18 @@
 
 function filter_change(){
-    // locality
-    const locality = [];
-    $("#filter-holder input[name='locality']:checked").each(function(){
-        locality.push(this.value);
-    });
+    const filter = {
+        locally: document.getElementById("main-locally").checked ? "1" : "",
+        online: document.getElementById("main-online").checked ? "1" : "",
+        price1: $("#main-price1").val(),
+        price2: $("#main-price2").val(),
+        created1: $("#main-created1").val(),
+        created2: $("#main-created2").val(),
+        edited1: $("#main-edited1").val(),
+        edited2: $("#main-edited2").val(),
+        tree_filter: $("#main-tree").jstree(true).get_checked()
+    };
+    // save filter
+    localStorage.setItem("filter_data", JSON.stringify(filter));
     // ajax call
     $.ajax({
         url: "php/filter_services.php",
@@ -12,13 +20,14 @@ function filter_change(){
         data: {
             get_data: 1,
             load_limit: 30,
-            locality: locality,
-            price1: $("#filter-holder input[name='price1']").val(),
-            price2: $("#filter-holder  input[name='price2']").val(),
-            created1: $("#filter-holder input[name='created1']").val(),
-            created2: $("#filter-holder input[name='created2']").val(),
-            edited1: $("#filter-holder input[name='edited1']").val(),
-            edited2: $("#filter-holder input[name='edited2']").val()
+            locally: filter.locally,
+            online: filter.online,
+            price1: filter.price1,
+            price2: filter.price2,
+            created1: filter.created1,
+            created2: filter.created2,
+            edited1: filter.edited1,
+            edited2: filter.edited2
         },
         success:update_services
     });
@@ -26,7 +35,7 @@ function filter_change(){
 
 function update_services(service_data) {
     const services = JSON.parse(service_data);
-    const tree_filter = $("#tree-filter").jstree(true);
+    const tree_filter = $("#main-tree").jstree(true);
     // reset service count
     const service_count = [];
     $.each(tree_filter.get_json("#", {flat: true}), function(){
@@ -37,7 +46,7 @@ function update_services(service_data) {
         }
     });
     // get selected services
-    const selected_services = new Set(tree_filter.get_selected());
+    const selected_services = new Set(tree_filter.get_checked());
     let num = 0;
     // loop trough services
     let html = "";
@@ -92,7 +101,7 @@ function update_services(service_data) {
     $.each(tree_filter.get_json(), function(){
         num += add_childs(this);
     });
-    $("#selectAll-text").html("Select all (" + num + ")");
+    $("#main-all-text").html("Select all (" + num + ")");
     // add styled services
     $("#service-holder").html(html);
     // get when service is pressed
@@ -101,9 +110,31 @@ function update_services(service_data) {
     });
 }
 
+function fill_filters() {
+    const data = localStorage.getItem("filter_data");
+    if (data) {
+        const filter = JSON.parse(data);
+        // checkboxes
+        document.getElementById("main-locally").checked = filter.locally;
+        document.getElementById("main-online").checked = filter.online;
+        // normal inputs
+        $("#main-price1").val(filter.price1);
+        $("#main-price2").val(filter.price2);
+        $("#main-created1").val(filter.created1);
+        $("#main-created2").val(filter.created2);
+        $("#main-edited1").val(filter.edited1);
+        $("#main-edited2").val(filter.edited2);
+        // tree filter
+        const tree_filter = $("#main-tree").jstree(true);
+        for (const id of filter.tree_filter) {
+            tree_filter.select_node(id);
+        }
+    }
+}
+
 
 function init_main_tab() {
-    $("#tree-filter").jstree({
+    $("#main-tree").jstree({
         core: {
             data: {
                 method: "POST",
@@ -115,22 +146,23 @@ function init_main_tab() {
         plugins: ["checkbox", "wholerow"],
         checkbox: {keep_selected_style: 0}
     });
-    $("#tree-filter").on("ready.jstree", function() {
+    $("#main-tree").on("ready.jstree", function() {
+        fill_filters();
         filter_change();
     });
     // callbacks
-    $("#selectAll").change(function(){
+    $("#main-all").change(function(){
         if ($(this).is(":checked")) {
-            $("#tree-filter").jstree(true).check_all();
+            $("#main-tree").jstree(true).check_all();
         } else {
-            $("#tree-filter").jstree(true).uncheck_all();
+            $("#main-tree").jstree(true).uncheck_all();
         }
         filter_change();
     });
     
-    $("#tab-main input:not(#selectAll)").on("change", filter_change);
+    $("#tab-main input:not(#main-all)").on("change", filter_change);
     
-    $("#tree-filter").on("changed.jstree", function(n, e){
+    $("#main-tree").on("changed.jstree", function(n, e){
         if (e.action === "select_node" || e.action === "deselect_node") {
             filter_change();
         }

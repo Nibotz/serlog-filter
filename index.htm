@@ -33,31 +33,31 @@
             <h2>Filters</h2>
             <div class="filter">
                 <h3>Service available</h3>
-                <input type="checkbox" name="locality" value="locally"><span> Locally</span>
-                <input type="checkbox" name="locality" value="online"><span> Online</span>
+                <input type="checkbox" id="main-locally"><span> Locally</span>
+                <input type="checkbox" id="main-online"><span> Online</span>
             </div>
             <div class="filter">
                 <h3>Price(&euro;)</h3>
-                <input name="price1">
+                <input id="main-price1" placeholder="0">
                 <span>-</span>
-                <input name="price2">
+                <input id="main-price2" placeholder="999999">
             </div>
             <div class="filter">
                 <h3>Created between</h3>
-                <input type="date" name="created1">
+                <input type="date" id="main-created1">
                 <span>-</span>
-                <input type="date" name="created2">
+                <input type="date" id="main-created2">
         
                 <h3>Edited between</h3>
-                <input type="date" name="edited1">
+                <input type="date" id="main-edited1">
                 <span>-</span>
-                <input type="date" name="edited2">
+                <input type="date" id="main-edited2">
             </div>
             <div class="filter">
                 <h3>Categories</h3>
-                <input type="checkbox" id="selectAll">
-                <span id="selectAll-text"></span>
-                <div id="tree-filter">
+                <input type="checkbox" id="main-all">
+                <span id="main-all-text"></span>
+                <div id="main-tree">
                     <!-- tree filter shown here -->
                 </div>
             </div>
@@ -67,25 +67,25 @@
     <div class="tab" id="tab-make">
         <h2>Add service</h2>
         <h3>Upload images</h3>
-        <input type="file" name="image">
+        <input type="file" id="make-image">
         <h3>Categorization</h3>
-        <div id="make-tree_cat">
+        <div id="make-tree">
             <!-- tree categories here -->
         </div>
         <h3>Contact information</h3>
         <h4>Private email</h4>
-        <input type="email" name="email" placeholder="johndoe@example.com">
+        <input type="email" id="make-email" placeholder="johndoe@example.com">
         <h4>Website</h4>
-        <input type="url" name="website" placeholder="Website (optional)">
+        <input type="url" id="make-website" placeholder="Website (optional)">
         <h4>Service available</h4>
-        <input type="checkbox" name="locality" value="locally"><span> locally</span>
-        <input type="checkbox" name="locality" value="online"><span> online</span>
+        <input type="checkbox" id="make-locally" value="locally"><span> locally</span>
+        <input type="checkbox" id="make-online" value="online"><span> online</span>
         <h4>Location</h4>
-        <input type="text" name="location" placeholder="Enter street or city">
+        <input type="text" id="make-location" placeholder="Enter street or city">
         <h4>Title</h4>
-        <input type="text" name="title" placeholder="Title">
+        <input type="text" id="make-title" placeholder="Title">
         <h4>Description</h4>
-        <textarea name="description" placeholder="Description" cols="40" rows="10"></textarea>
+        <textarea id="make-description" placeholder="Description" cols="40" rows="10"></textarea>
         <br><br>
         <button id="make-reset">Reset</button>
         <button id="make-upload">Upload media</button>

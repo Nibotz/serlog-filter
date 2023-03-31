@@ -16,12 +16,11 @@ LEFT JOIN cats AS c ON s.js_tree_cat = c.id
 WHERE 1 ";
 
 // local/online filter
-if (isset($_POST["locality"]) && !empty($_POST["locality"])) {
-    $query .= "AND(s.locality LIKE '%" . $_POST["locality"][0] . "%'";
-    for ($i=1; $i < count($_POST["locality"]); $i++) {
-        $query .= " AND s.locality LIKE '%" . $_POST["locality"][$i] . "%'";
-    }
-    $query .= ")";
+if ($_POST["locally"]) {
+    $query .= "AND(s.locality LIKE '%locally%')";
+}
+if ($_POST["online"]) {
+    $query .= "AND(s.locality LIKE '%online%')";
 }
 // price filters using services_childs
 if ($_POST["price1"] !== "" && ctype_digit($_POST["price1"])) {
